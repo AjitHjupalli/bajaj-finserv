@@ -1,0 +1,66 @@
+const express = require('express');
+const app = express();
+const bodyParser = require('body-parser');
+
+// Replace with your actual user information
+const userId = "john_doe_17091999";
+const email = "john@xyz.com";
+const rollNumber = "ABCD123";
+
+app.use(bodyParser.json());
+
+// POST /bfhl endpoint
+app.post('/bfhl', (req, res) => {
+  try {
+    const data = req.body.data;
+    if (!Array.isArray(data)) {
+      throw new Error('Invalid request format. Data should be an array.');
+    }
+
+    const numbers = [];
+    const alphabets = [];
+    let highestAlphabet;
+
+    for (const item of data) {
+      if (typeof item === 'string') {
+        alphabets.push(item.toUpperCase());
+        highestAlphabet = updateHighestAlphabet(highestAlphabet, item);
+      } else if (typeof item === 'number') {
+        numbers.push(item);
+      } else {
+        throw new Error('Invalid data type in input array.');
+      }
+    }
+
+    highestAlphabet = highestAlphabet ? [highestAlphabet] : [];
+
+    res.json({
+      is_success: true,
+      user_id: userId,
+      email: email,
+      roll_number: rollNumber,
+      numbers,
+      alphabets,
+      highest_alphabet,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ is_success: false, error: error.message });
+  }
+});
+
+// GET /bfhl endpoint
+app.get('/bfhl', (req, res) => {
+  res.status(200).json({ operation_code: 1 });
+});
+
+// Function to update highest alphabet
+function updateHighestAlphabet(current, newChar) {
+  if (!current || newChar.charCodeAt(0) > current.charCodeAt(0)) {
+    return newChar;
+  }
+  return current;
+}
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => console.log(`Server listening on port ${port}`));
